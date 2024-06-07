@@ -3,7 +3,6 @@ from funciones_genericas import *
 from funciones_examen import *
 from random import randint
 from validaciones import *
-import os  
 
 menu = (
     '''¡BIENVENIDO AL MENU!
@@ -21,12 +20,12 @@ menu = (
 
 # Función principal para iniciar el programa
 def iniciar_programa(menu):
-    lista_datos = []  # Se inicializa lista_datos como vacía
+    lista_datos = []
     seguir = True
     while seguir:
         print(menu)
         opcion = input("Elija una opción (1-9): ")
-        os.system("cls")  # Usar os.system para limpiar la consola
+        system("cls")
 
         if opcion != "1" and opcion != "9" and len(lista_datos) == 0:
             print("Debe cargar un archivo CSV primero.")
@@ -34,25 +33,15 @@ def iniciar_programa(menu):
             match opcion:
                 case "1":
                     lista_datos = cargar_archivo()
-                    if lista_datos:
-                        print("Archivo cargado con éxito.")
-                    else:
-                        print("No se pudo cargar el archivo o está vacío.")
                 case "2":
                     imprimir_lista(lista_datos)
                 case "3":
+                    lista_datos = asignar_tiempo(lista_datos)
                     lista_datos = map_list(lambda bicicleta: asignar_tiempo(bicicleta), lista_datos)
                 case "4":
                     informar_ganador(lista_datos)
                 case "5":
-                    lista_filtrada = filtrar_por_tipo(lista_datos)
-                    if validar_lista(lista_filtrada):
-                        primer_elemento = lista_filtrada[0]
-                        tipo = primer_elemento['tipo']
-                        path = f"{tipo}.csv"
-                        generar_csv(path, lista_filtrada)
-                    else:
-                        print("No se encontraron bicicletas del tipo especificado.")
+                    filtrar_por_tipo(lista_datos)
                 case "6":
                     promedios = informar_promedio_tipo(lista_datos)
                     for tipo, promedio in promedios.items():
@@ -68,9 +57,10 @@ def iniciar_programa(menu):
 
         if seguir:
             input("Presione Enter para continuar...")
-            os.system("cls") 
+            system("cls")
 
     print("¡Gracias por utilizar nuestro programa!")
 
-
+# Iniciar el programa con el menú
 iniciar_programa(menu)
+
