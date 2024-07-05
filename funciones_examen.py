@@ -4,37 +4,38 @@ from random import randint
 from validaciones import *
 
 # Cargar archivo .CSV
-def cargar_archivo():
+def cargar_archivo()-> list:
     """
-    Carga los datos de un archivo CSV llamado 'bicicletas.csv' y los convierte en una lista de diccionarios.
+    Carga los datos de un archivo CSV y los convierte en una lista de diccionarios.
 
     Args:
     - None
 
     Returns:
-    - None
+    - Retorna la lista cargada con los datos del CSV.
     """
-    ruta_archivo = "bicicletas.csv"
-    lista_datos = parser_csv(ruta_archivo)
-
+    path = input("Por favor ingrese la ruta del archivo .CSV a cargar: ")
+    lista_datos = parser_csv(path)
+    if lista_datos != None:
+        print("¡Archivo cargado con éxito!")
+    return lista_datos
 
 # Imprimir lista
 def imprimir_lista(lista: list):
     """
-    Valida y muestra la lista de diccionarios de bicicletas.
+    Valida y muestra una lista.
 
     Args:
-    - lista (list): Lista de diccionarios que contiene información de bicicletas.
+    - lista (list): Lista de diccionarios.
 
     Returns:
     - None
     """
-    validar_lista(lista)
-    mostrar_lista(lista)
-
+    if validar_lista (lista) == True:
+        mostrar_lista(lista)
 
 # Asignar tiempos
-def asignar_tiempo(bicicleta):
+def asignar_tiempo_bicicleta(bicicleta)-> dict:
     """
     Asigna un tiempo aleatorio entre 50 y 120 a la bicicleta.
 
@@ -47,6 +48,27 @@ def asignar_tiempo(bicicleta):
     bicicleta['tiempo'] = randint(50, 120)
     return bicicleta
 
+def asignar_tiempos(lista:list)-> bool:
+    """
+    Asigna tiempos a cada bicicleta en la lista utilizando una función de mapeo y muestra los resultados.
+
+    Args:
+    - lista (list): Lista de diccionarios que contienen información sobre bicicletas.
+
+    Returns:
+    - bool: `True` si los tiempos fueron asignados y cargados correctamente, `False` en caso contrario.
+
+    Raises:
+    - TypeError: Si se produce un error durante la asignación de tiempos.
+    """
+    try:
+        lista_datos = map_list(asignar_tiempo_bicicleta, lista)
+        mostrar_lista(lista_datos)
+    except TypeError as e:
+        print (e)
+    if lista_datos:
+        tiempos_cargados = True
+    return tiempos_cargados
 
 # Informar ganador
 def definir_ganador(lista: list) -> dict:
@@ -72,7 +94,6 @@ def definir_ganador(lista: list) -> dict:
         return {"Ganador": ganador["nombre"], "Tiempo": tiempo_ganador}
     return {"Empate": bicicletas_empatadas, "Tiempo": tiempo_ganador}
 
-
 def informar_ganador(lista: list) -> dict:
     """
     Informa el resultado de la carrera, mostrando el ganador o los empatados en tiempo.
@@ -89,32 +110,48 @@ def informar_ganador(lista: list) -> dict:
     print("------------------------------")
     mostrar_diccionario(resultado_carrera)
 
-
 # Filtrar por tipo
-def filtrar_por_tipo(lista: list) -> list:
+def filtrar_por_tipo(lista: list) -> list | None:
     """
-    Filtra la lista de bicicletas por el tipo especificado por el usuario.
+    Filtra una lista de bicicletas por tipo ingresado por el usuario.
 
     Args:
     - lista (list): Lista de diccionarios que contiene información de bicicletas.
 
     Returns:
-    - list: Lista de diccionarios con bicicletas que corresponden al tipo especificado.
+    - list: Lista filtrada de diccionarios con el tipo de bicicleta solicitado.
     """
-    tipo = input("Ingrese el tipo de bicicleta que desea: ").upper()
-    lista_filtrada = filtrar(lista, "tipo", tipo)
-    return lista_filtrada
+    tipos = list(set(mapear_campo(lista, "tipo")))
+    tipo = input("Ingrese el tipo de bicicleta que desea filtrar [MTB, BMX, PLAYERA, PASEO]: ").upper()
 
-lista_filtrada = filtrar_por_tipo(lista_datos)
+    if buscar_en_lista(tipos, tipo):
+        lista_filtrada = filtrar(lista, "tipo", tipo)
+        return lista_filtrada
+    else:
+        return None
+    
+def filtrar_bicicletas(lista: list):
+    """
+    Filtra la lista de bicicletas por tipo y genera un archivo CSV con los resultados.
 
-if validar_lista(lista_filtrada):
-    primer_elemento = lista_filtrada[0]
-    tipo = primer_elemento['tipo']
-    path = f"{tipo}.csv"
-    generar_csv(path, lista_filtrada)
-else:
-    print("No se encontraron bicicletas del tipo especificado.")
+    Args:
+    - lista (list): Lista de diccionarios que contienen información sobre bicicletas.
 
+    Returns:
+    - None: La función no retorna ningún valor, pero genera un archivo CSV si la lista filtrada es válida.
+
+    Prints:
+    - Mensajes indicando el éxito de la operación o si el tipo de bicicleta no es válido.
+    """
+    lista_filtrada = filtrar_por_tipo(lista)
+    if validar_lista(lista_filtrada):
+        primer_elemento = lista_filtrada[0]
+        tipo = primer_elemento["tipo"]
+        path = f"{tipo}.csv"
+        generar_csv(path, lista_filtrada)
+        print(f"¡Archivo creado con exito en {path}!")
+    else:
+        print("TIPO DE BICICLETA NO VÁLIDO.")
 
 # Informar promedio por tipo
 def informar_promedio_tipo(lista: list) -> dict:
@@ -127,12 +164,12 @@ def informar_promedio_tipo(lista: list) -> dict:
     Returns:
     - dict: Diccionario con el tipo de bicicleta como clave y su promedio de tiempo como valor.
     """
-    tipos = set(mapear_campo(lista, 'tipo'))
+    tipos = set(mapear_campo(lista, "tipo"))
     promedios = {}
 
     for tipo in tipos:
-        bicicletas_tipo = filtrar(lista, 'tipo', tipo)
-        tiempos = mapear_campo(bicicletas_tipo, 'tiempo')
+        bicicletas_tipo = filtrar(lista, "tipo", tipo)
+        tiempos = mapear_campo(bicicletas_tipo, "tiempo")
         if tiempos:
             promedio = calcular_promedio(tiempos)
         else:
@@ -141,21 +178,25 @@ def informar_promedio_tipo(lista: list) -> dict:
 
     return promedios
 
-
 # Mostrar las posiciones
-def mostrar_posiciones(lista: list):
+def mostrar_posiciones(lista:list)-> bool:
     """
-    Ordena y muestra la lista de bicicletas según su tiempo de menor a mayor.
+    Ordena la lista de bicicletas por tipo y tiempo, y muestra las posiciones.
 
     Args:
-    - lista (list): Lista de diccionarios que contiene información de bicicletas.
+    - lista (list): Lista de diccionarios que contienen información sobre bicicletas.
 
     Returns:
-    - None
-    """
-    lista_ordenada = ordenar_lista(lista, ascendente=True)
-    imprimir_lista(lista_ordenada)
+    - bool: True si las posiciones se muestran correctamente.
 
+    Prints:
+    - Detalles de cada bicicleta ordenada por tipo y tiempo.
+    """
+    ordenar_lista_doble_criterio(lista, "tipo", "tiempo")
+    posiciones = True
+    for bicicleta in lista:
+        print(f'Tipo: {bicicleta["tipo"]}, Tiempo: {bicicleta["tiempo"]}')
+    return posiciones
 
 # Guardar posiciones
 def guardar_posiciones(lista: list):
@@ -168,7 +209,5 @@ def guardar_posiciones(lista: list):
     Returns:
     - None
     """
-    lista_ordenada = ordenar_lista(lista, ascendente=True)
-    diccionario = {"bicicletas": lista_ordenada}
-    generar_json("posiciones.json", diccionario)
+    generar_json("posiciones.json", lista)
     print("Posiciones guardadas en 'posiciones.json'.")

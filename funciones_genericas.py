@@ -1,22 +1,6 @@
 from validaciones import *
 from os import system
 
-''' FORMALIZAR '''
-def formalizar_lista(lista: list):
-    """
-    Convierte los valores de 'altura', 'peso' y 'fuerza' en cada diccionario de la lista a tipos numéricos específicos.
-    
-    Args:
-    - lista (list): Lista de diccionarios que contiene información sobre elementos con campos 'altura', 'peso' y 'fuerza'.
-    
-    Returns:
-    - None
-    """
-    for elem in lista:
-        elem["altura"] = float(elem["altura"])
-        elem["peso"] = float(elem["peso"])
-        elem["fuerza"] = int(elem["fuerza"])
-
 ''' PROMEDIO '''
 def totalizar_lista(lista: list) -> float:
     """
@@ -96,9 +80,11 @@ def mostrar_lista(lista: list) -> None:
     Returns:
     - None
     """
-    validar_lista(lista)
     for elem in lista:
-        print(elem)
+        print(f'id: {elem['id_bike']} \n'
+              f'nombre: {elem['nombre']} \n'
+              f'tipo: {elem['tipo']} \n'
+              f'tiempo: {elem['tiempo']} \n')
 
 def mostrar_diccionario(diccionario: dict) -> None:
     """
@@ -184,6 +170,22 @@ def calcular_minimo(lista: list) -> int:
             minimo = elemento
     return minimo
 
+''' FORMALIZAR '''
+def formalizar_lista(lista: list):
+    """
+    Convierte los valores de 'altura', 'peso' y 'fuerza' en cada diccionario de la lista a tipos numéricos específicos.
+    
+    Args:
+    - lista (list): Lista de diccionarios que contiene información sobre elementos con campos 'altura', 'peso' y 'fuerza'.
+    
+    Returns:
+    - None
+    """
+    for elem in lista:
+        elem["altura"] = float(elem["altura"])
+        elem["peso"] = float(elem["peso"])
+        elem["fuerza"] = int(elem["fuerza"])
+
 ''' ORDENAMIENTOS '''
 def ordenar_ascendente(lista: list) -> None:
     """
@@ -240,6 +242,59 @@ def ordenar_lista(lista: list, ascendente: bool = True) -> list:
     else:
         ordenar_descendente(lista)  
     return lista
+
+def swap_lista(lista:list, i:int, j: int)-> None:
+    """
+    Intercambia los elementos en las posiciones `i` y `j` de una lista.
+
+    Args:
+    - lista (list): Lista en la que se realizará el intercambio.
+    - i (int): Índice del primer elemento a intercambiar.
+    - j (int): Índice del segundo elemento a intercambiar.
+
+    Returns:
+    - None: La función no retorna ningún valor, pero modifica la lista en su lugar.
+    """
+    auxiliar = lista[i]
+    lista[i] = lista [j]
+    lista [j] = auxiliar
+
+def ordenar_lista_campo(lista : list, criterio: str, descendente: bool = False):
+    """
+    Ordena una lista de diccionarios en función de un campo específico.
+
+    Args:
+    - lista (list): Lista de diccionarios a ordenar.
+    - criterio (str): El campo por el cual se ordenará la lista.
+    - descendente (bool): Indicador de si la ordenación debe ser en orden descendente. Por defecto es `False` (ascendente).
+
+    Returns:
+    - None: La función no retorna ningún valor, pero ordena la lista en su lugar.
+    """
+    for i in range (len(lista)-1):
+        for j in range (i+1, len(lista)):
+            if lista[i][criterio] > lista [j][criterio]:
+                swap_lista(lista, i, j)
+
+def ordenar_lista_doble_criterio(lista : list, primer_criterio: str, segundo_criterio:str):
+    """
+    Ordena una lista de diccionarios utilizando dos criterios de ordenación.
+
+    Args:
+    - lista (list): Lista de diccionarios a ordenar.
+    - primer_criterio (str): El primer campo por el cual se ordenará la lista.
+    - segundo_criterio (str): El segundo campo para desempatar cuando los valores del primer campo son iguales.
+
+    Returns:
+    - None: La función no retorna ningún valor, pero ordena la lista en su lugar.
+    """
+    for i in range (len(lista)-1):
+        for j in range (i+1, len(lista)):
+            if lista[i][primer_criterio] == lista [j][primer_criterio]:
+                if lista[i][segundo_criterio] > lista[j][segundo_criterio]:
+                    swap_lista(lista, i, j)
+            elif lista[i][primer_criterio] > lista [j][primer_criterio]:
+                swap_lista(lista, i, j)
 
 ''' BÚSQUEDAS '''
 def buscar_dato_dict(lista: list, campo: str, valor) -> dict:
@@ -328,7 +383,6 @@ def buscar_en_lista(lista: list, target) -> bool:
     Returns:
     - bool: True si el valor se encuentra en la lista, False en caso contrario.
     """
-    validar_lista(lista)
     for elem in lista:
         if elem == target:
             return True
